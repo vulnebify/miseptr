@@ -1,0 +1,36 @@
+name: Test misePTR
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Install setup-envtest
+        run: |
+          make setup-envtest
+          echo "$HOME/go/bin" >> $GITHUB_PATH
+
+      - name: Prepare Kubernetes Binaries
+        run: |
+          make fetch-envtest-binaries
+
+      - name: Run Tests
+        run: |
+          make test

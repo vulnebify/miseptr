@@ -1,0 +1,53 @@
+name: Release misePTR
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    name: Build & Publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Build with Makefile
+        run: make build
+
+      - name: Generate SHA256 Checksum
+        run: |
+          cd bin
+          sha256sum miseptr > miseptr.sha256
+
+      - name: Upload Release Binary & Checksum
+        uses: softprops/action-gh-release@v1
+        with:
+          name: miseptr
+          tag_name: ${{ github.ref_name }}
+          files: |
+            bin/miseptr
+            bin/miseptr.sha256
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image to GHCR
+        run: |
+          IMAGE_NAME=ghcr.io/vulnebify/miseptr
+          VERSION=${{ github.ref_name }}
+          docker build -t $IMAGE_NAME:$VERSION -t $IMAGE_NAME:latest .
+          docker push $IMAGE_NAME:$VERSION
+          docker push $IMAGE_NAME:latest

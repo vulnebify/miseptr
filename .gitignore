@@ -1,0 +1,27 @@
+# Go
+/bin/
+/bin/*
+*.exe
+*.out
+*.test
+*.log
+*.tmp
+*.cache
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test output
+coverage.out
+*.prof
+
+# Docker
+*.tar
+docker-compose.override.yml
+
+# OS metadata
+.DS_Store
+Thumbs.db
