@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -71,20 +72,28 @@ func (c *Controller) StartController() {
 
 func (c *Controller) handleNewNode(node *v1.Node) {
 	nodeName := node.GetName()
-	externalIP := ""
-	for _, addr := range node.Status.Addresses {
-		if addr.Type == v1.NodeExternalIP {
-			externalIP = addr.Address
+
+	var externalIP string
+	for i := 0; i < 6; i++ {
+		for _, addr := range node.Status.Addresses {
+			if addr.Type == v1.NodeExternalIP {
+				externalIP = addr.Address
+				break
+			}
+		}
+		if externalIP != "" {
 			break
 		}
+		fmt.Printf("🔁 ExternalIP not found for node %s, retrying...\n", nodeName)
+		time.Sleep(5 * time.Second)
 	}
+
 	if externalIP == "" {
-		fmt.Printf("No ExternalIP found for node %s\n", nodeName)
+		fmt.Printf("⚠️ No ExternalIP found for node %s after retries, skipping PTR update.\n", nodeName)
 		return
 	}
 
-	err := c.provider.UpdatePTR(externalIP, nodeName)
-	if err != nil {
-		fmt.Printf("Failed to update PTR for node %s: %v\n", nodeName, err)
+	if err := c.provider.UpdatePTR(externalIP, nodeName); err != nil {
+		fmt.Printf("❌ Failed to update PTR for %s (%s): %v\n", nodeName, externalIP, err)
 	}
 }
