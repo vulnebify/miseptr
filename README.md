@@ -6,17 +6,17 @@
 
 ---
 
-## ✨ Featuress
+## Features
 
-- 👀 Watch Kubernetes Node events in real-time  
-- 🌍 Update PTR (reverse DNS) records automatically  
-- 🔌 Pluggable provider system (default: Vultr)  
-- 🧪 Full integration testing with envtest  
-- ⚡ Built with Go, no CRDs required  
+- Watch Kubernetes Node events in real-time 👀
+- Update PTR (reverse DNS) records automatically 🌍 
+- Pluggable provider system (default: Vultr) 🔌
+- Full integration testing with envtest 🧪
+- Built with Go, no CRDs required ⚡ 
 
 ---
 
-## 📦 Installation
+## Installation
 
 ### Build locally
 
@@ -26,7 +26,7 @@ make build
 
 ---
 
-## 🚀 Usage
+## Usage
 
 ```bash
 ./bin/miseptr watch --provider vultr --suffix example.com
@@ -35,6 +35,13 @@ make build
 ✅ Connects automatically to in-cluster Kubernetes or local `~/.kube/config`.
 
 ---
+
+## Commands
+
+| Command                | Description                                |
+|-------------------------|--------------------------------------------|
+| `miseptr watch`    | Watch nodes and update PTR records         |
+
 
 ### Flags
 
@@ -45,15 +52,7 @@ make build
 
 ---
 
-## 🔧 Commands
-
-| Command                | Description                                |
-|-------------------------|--------------------------------------------|
-| `miseptr watch`    | Watch nodes and update PTR records         |
-
----
-
-## 🧪 Testing
+## Testing
 
 Install setup-envtest and run tests:
 
@@ -67,7 +66,7 @@ make test
 
 ---
 
-## 📥 GitHub Release
+## GitHub Release
 
 To create a versioned release:
 
@@ -80,6 +79,6 @@ The binary will appear under [Releases](../../releases).
 
 ---
 
-## 📝 License
+## License
 
 This project is licensed under the [MIT License](./LICENSE).
