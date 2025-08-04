@@ -18,7 +18,7 @@ var watchCmd = &cobra.Command{
 	Use:   "watch",
 	Short: "Monitor new Kubernetes nodes and update their PTR records",
 	Run: func(cmd *cobra.Command, args []string) {
-		var provider providers.Provider
+		var provider providers.HostingProvider
 
 		switch providerName {
 		case "vultr":

@@ -14,10 +14,18 @@ require (
 
 require (
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
+	github.com/goccy/go-json v0.10.5 // indirect
+	github.com/tidwall/gjson v1.14.4 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/pretty v1.2.1 // indirect
+	github.com/tidwall/sjson v1.2.5 // indirect
 	k8s.io/apiextensions-apiserver v0.32.1 // indirect
 )
 
 require (
+	github.com/cloudflare/cloudflare-go v0.115.0
+	github.com/cloudflare/cloudflare-go/v4 v4.6.0
+	github.com/cloudflare/cloudflare-go/v5 v5.0.0
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
