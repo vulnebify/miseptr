@@ -10,29 +10,31 @@ import (
 )
 
 var (
-	providerName string
-	ptrSuffix    string
+	hostingProviderName string
+	dnsProviderName     string
+	ptrSuffix           string
 )
 
 var watchCmd = &cobra.Command{
 	Use:   "watch",
 	Short: "Monitor new Kubernetes nodes and update their PTR records",
 	Run: func(cmd *cobra.Command, args []string) {
-		var provider providers.HostingProvider
+		var hostingProvider providers.HostingProvider
+		var dnsProvider providers.DnsProvider
 
-		switch providerName {
+		switch hostingProviderName {
 		case "vultr":
 			hostingProvider = providers.NewVultrProvider(ptrSuffix)
 		default:
-			fmt.Printf("Unsupported provider: %s\n", providerName)
+			fmt.Printf("Unsupported provider: %s\n", hostingProviderName)
 			os.Exit(1)
 		}
 		switch dnsProviderName {
 		case "cloudflare":
-			dnsProvider
+			dnsProvider = providers.NewCloudflareDnsProvider("vulnebify.com")
 		}
 
-		controller, err := controller.NewController(provider)
+		controller, err := controller.NewController(hostingProvider, dnsProvider)
 		if err != nil {
 			panic(fmt.Sprintf("Failed to create controller: %v", err))
 		}
