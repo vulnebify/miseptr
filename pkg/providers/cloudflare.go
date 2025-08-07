@@ -33,11 +33,10 @@ func NewCloudflareDnsProvider(zoneName string) *CloudflareDnsProvider {
 	}
 }
 
-func (cdp *CloudflareDnsProvider) UpdateA(ip, nodeName string) {
+func (cdp *CloudflareDnsProvider) UpdateA(ip, nodeName string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	// requestOptions = cloudflare.
 	recordParams := dns.ARecordParam{
 		Name:    cloudflare.F(nodeName),
 		TTL:     cloudflare.F(dns.TTL(60)),
@@ -57,4 +56,6 @@ func (cdp *CloudflareDnsProvider) UpdateA(ip, nodeName string) {
 	if err != nil {
 		fmt.Printf("Failed to create A record: %v\n", err)
 	}
+	fmt.Printf("✅ A updated: %s -> %s\n", nodeName, ip)
+	return nil
 }

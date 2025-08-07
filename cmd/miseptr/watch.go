@@ -22,10 +22,14 @@ var watchCmd = &cobra.Command{
 
 		switch providerName {
 		case "vultr":
-			provider = providers.NewVultrProvider(ptrSuffix)
+			hostingProvider = providers.NewVultrProvider(ptrSuffix)
 		default:
 			fmt.Printf("Unsupported provider: %s\n", providerName)
 			os.Exit(1)
+		}
+		switch dnsProviderName {
+		case "cloudflare":
+			dnsProvider
 		}
 
 		controller, err := controller.NewController(provider)
@@ -38,7 +42,8 @@ var watchCmd = &cobra.Command{
 }
 
 func init() {
-	watchCmd.Flags().StringVar(&providerName, "provider", "vultr", "Provider for PTR updates (vultr)")
+	watchCmd.Flags().StringVar(&dnsProviderName, "suffix", "", "Domain suffix for generated PTR records")
+	watchCmd.Flags().StringVar(&hostingProviderName, "hosting-provider", "vultr", "Provider for PTR updates (vultr)")
 	watchCmd.Flags().StringVar(&ptrSuffix, "suffix", "", "Domain suffix for generated PTR records")
 
 	cobra.CheckErr(watchCmd.MarkFlagRequired("suffix"))
