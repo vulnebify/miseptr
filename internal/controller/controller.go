@@ -18,11 +18,12 @@ import (
 )
 
 type Controller struct {
-	provider  providers.Provider
-	clientset kubernetes.Interface
+	hostingProvider providers.HostingProvider
+	dnsProvider     providers.DnsProvider
+	clientset       kubernetes.Interface
 }
 
-func NewController(provider providers.Provider) (*Controller, error) {
+func NewController(hostingProvider providers.HostingProvider, dnsProvider providers.DnsProvider) (*Controller, error) {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		// fallback to local kubeconfig
@@ -39,15 +40,17 @@ func NewController(provider providers.Provider) (*Controller, error) {
 	}
 
 	return &Controller{
-		provider:  provider,
-		clientset: clientset,
+		hostingProvider: hostingProvider,
+		dnsProvider:     dnsProvider,
+		clientset:       clientset,
 	}, nil
 }
 
-func WithCustomKubernetesClient(provider providers.Provider, clientset kubernetes.Interface) *Controller {
+func WithCustomKubernetesClient(hostingProvider providers.HostingProvider, dnsProvider providers.DnsProvider, clientset kubernetes.Interface) *Controller {
 	return &Controller{
-		provider:  provider,
-		clientset: clientset,
+		hostingProvider: hostingProvider,
+		dnsProvider:     dnsProvider,
+		clientset:       clientset,
 	}
 }
 
@@ -101,7 +104,11 @@ func (c *Controller) handleNewNode(node *v1.Node) {
 		return
 	}
 
-	if err := c.provider.UpdatePTR(externalIP, nodeName); err != nil {
+	if err := c.hostingProvider.UpdatePTR(externalIP, nodeName); err != nil {
 		fmt.Printf("Failed to update PTR for %s (%s): %v\n", nodeName, externalIP, err)
+	}
+
+	if err := c.dnsProvider.UpdateA(externalIP, nodeName); err != nil {
+		fmt.Printf("Failed to update A record for %s (%s): %v\n", nodeName, externalIP, err)
 	}
 }
