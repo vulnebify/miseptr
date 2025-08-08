@@ -31,7 +31,7 @@ var watchCmd = &cobra.Command{
 		}
 		switch dnsProviderName {
 		case "cloudflare":
-			dnsProvider = providers.NewCloudflareDnsProvider("vulnebify.com")
+			dnsProvider = providers.NewCloudflareDnsProvider(ptrSuffix)
 		}
 
 		controller, err := controller.NewController(hostingProvider, dnsProvider)
@@ -44,7 +44,6 @@ var watchCmd = &cobra.Command{
 }
 
 func init() {
-	watchCmd.Flags().StringVar(&dnsProviderName, "suffix", "", "Domain suffix for generated PTR records")
 	watchCmd.Flags().StringVar(&hostingProviderName, "hosting-provider", "vultr", "Provider for PTR updates (vultr)")
 	watchCmd.Flags().StringVar(&ptrSuffix, "suffix", "", "Domain suffix for generated PTR records")
 
