@@ -31,21 +31,24 @@ func NewCloudflareDnsProvider(suffix string) *CloudflareDnsProvider {
 		option.WithAPIToken(apiToken),
 	)
 
-	return &CloudflareDnsProvider{
+	cdp := &CloudflareDnsProvider{
 		client: client,
 		zone:   nil,
 		suffix: suffix,
 	}
+	err := cdp.getZone()
+	if err != nil {
+		fmt.Printf("Failed to get zone: %v\n", err)
+		fmt.Printf("Failed to create CloudflareDnsProvider: %v\n", err)
+		return nil
+	}
+	return cdp
 }
 
 func (cdp *CloudflareDnsProvider) UpdateA(ip, nodeName string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	err := cdp.getZone()
-	if err != nil {
-		return fmt.Errorf("failed to get zone: %w", err)
-	}
 	aRecordParams := dns.ARecordParam{
 		Name:    cloudflare.F(nodeName),
 		TTL:     cloudflare.F(dns.TTL(60)),
@@ -61,12 +64,12 @@ func (cdp *CloudflareDnsProvider) UpdateA(ip, nodeName string) error {
 
 	options := option.WithMaxRetries(3)
 
-	recordResponse, err := cdp.client.DNS.Records.New(ctx, newRecordParams, options)
+	_, err := cdp.client.DNS.Records.New(ctx, newRecordParams, options)
 	if err != nil {
 		fmt.Printf("Failed to create A record: %v\n", err)
+		return err
 	}
 	fmt.Printf("✅ A updated: %s -> %s\n", nodeName, ip)
-	fmt.Print(recordResponse)
 	return nil
 }
 
@@ -87,21 +90,15 @@ func (cdp *CloudflareDnsProvider) getZone() error {
 		Name: cloudflare.F(suffix),
 	})
 
-	if zone == nil {
-		fmt.Printf("Zone not found for suffix: %s\n", suffix)
-		os.Exit(1)
-	}
-	// make sure we have exactly one zone matching the query
-	if len(zone.Result) != 1 {
-		fmt.Printf("Expected one zone for suffix %s, found %d\n", suffix, len(zone.Result))
-		os.Exit(1)
+	if err != nil {
+		log.Fatalf("failed to list zones: %v", err)
+		return err
 	}
 
 	// Set the zone in the provider
 	cdp.zone = &zone.Result[0]
 	if cdp.zone == nil {
-		log.Fatalf("failed to extract zone: %v", err)
-		os.Exit(1)
+		log.Fatalf("Something unpredictable happened. Zone not found for suffix: %s", suffix)
 	}
 	return nil
 }
