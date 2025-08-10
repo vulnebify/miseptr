@@ -35,3 +35,4 @@ test: fetch-envtest-binaries
 	@echo "Using KUBEBUILDER_ASSETS=$(KUBEBUILDER_ASSETS_PATH)"
 	export KUBEBUILDER_ASSETS=$(KUBEBUILDER_ASSETS_PATH) && \
 	go test ./internal/controller -v
+	go test ./pkg/providers -v

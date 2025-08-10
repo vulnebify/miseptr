@@ -108,7 +108,9 @@ func (c *Controller) handleNewNode(node *v1.Node) {
 		fmt.Printf("Failed to update PTR for %s (%s): %v\n", nodeName, externalIP, err)
 	}
 
-	if err := c.dnsProvider.UpdateA(externalIP, nodeName); err != nil {
-		fmt.Printf("Failed to update A record for %s (%s): %v\n", nodeName, externalIP, err)
+	if c.dnsProvider != nil {
+		if err := c.dnsProvider.UpdateA(externalIP, nodeName); err != nil {
+			fmt.Printf("Failed to update A record for %s (%s): %v\n", nodeName, externalIP, err)
+		}
 	}
 }

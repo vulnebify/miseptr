@@ -102,17 +102,3 @@ func (cdp *CloudflareDnsProvider) getZone() error {
 	}
 	return nil
 }
-
-// // Form new DNS record parameter to use below
-// recordNewParams := dns.RecordNewParams{
-// 	ZoneID: cloudflare.F(cdp.zone.ID),
-// }
-
-// // Create a new DNS record and get a response
-// recordResponse, err := cdp.client.DNS.Records.New(ctx, recordNewParams, option.WithMaxRetries(3))
-// if err != nil {
-// 	return fmt.Errorf("failed to create DNS record: %w", err)
-// }
-
-// fmt.Printf("✅ Record created: %s -> %s\n", recordResponse.Name, recordResponse.Content)
-// return nil

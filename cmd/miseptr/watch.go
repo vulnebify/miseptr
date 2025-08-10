@@ -10,9 +10,9 @@ import (
 )
 
 var (
-	hostingProviderName string
-	dnsProviderName     string
-	ptrSuffix           string
+	provider string
+	dns      string
+	suffix   string
 )
 
 var watchCmd = &cobra.Command{
@@ -22,16 +22,22 @@ var watchCmd = &cobra.Command{
 		var hostingProvider providers.HostingProvider
 		var dnsProvider providers.DnsProvider
 
-		switch hostingProviderName {
+		switch provider {
 		case "vultr":
-			hostingProvider = providers.NewVultrProvider(ptrSuffix)
+			hostingProvider = providers.NewVultrProvider(suffix)
 		default:
-			fmt.Printf("Unsupported provider: %s\n", hostingProviderName)
+			fmt.Printf("Unsupported hosting provider: %s\n", provider)
 			os.Exit(1)
 		}
-		switch dnsProviderName {
+
+		switch dns {
 		case "cloudflare":
-			dnsProvider = providers.NewCloudflareDnsProvider(ptrSuffix)
+			dnsProvider = providers.NewCloudflareDnsProvider(suffix)
+		case "":
+			dnsProvider = nil
+		default:
+			fmt.Printf("Unsupported DNS provider: %s\n", dns)
+			os.Exit(1)
 		}
 
 		controller, err := controller.NewController(hostingProvider, dnsProvider)
@@ -44,8 +50,9 @@ var watchCmd = &cobra.Command{
 }
 
 func init() {
-	watchCmd.Flags().StringVar(&hostingProviderName, "hosting-provider", "vultr", "Provider for PTR updates (vultr)")
-	watchCmd.Flags().StringVar(&ptrSuffix, "suffix", "", "Domain suffix for generated PTR records")
+	watchCmd.Flags().StringVar(&provider, "provider", "vultr", "Provider for PTR updates (vultr)")
+	watchCmd.Flags().StringVar(&dns, "dns", "", "Provider for A updates (optional, options: cloudfalre)")
+	watchCmd.Flags().StringVar(&suffix, "suffix", "", "Domain suffix for generated records")
 
 	cobra.CheckErr(watchCmd.MarkFlagRequired("suffix"))
 }
