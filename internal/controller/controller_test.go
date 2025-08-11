@@ -25,6 +25,13 @@ func (m *MockProvider) UpdatePTR(ip, nodeName string) error {
 	return nil
 }
 
+func (m *MockProvider) UpdateA(ip, nodeName string) error {
+	m.Called = true
+	m.CalledIP = ip
+	m.CalledNode = nodeName
+	return nil
+}
+
 func TestControllerIntegration(t *testing.T) {
 	testEnv := &envtest.Environment{}
 	cfg, err := testEnv.Start()
@@ -37,11 +44,12 @@ func TestControllerIntegration(t *testing.T) {
 		t.Fatalf("failed to create client: %v", err)
 	}
 
-	mockProvider := &MockProvider{}
+	mockHostingProvider := &MockProvider{}
+	mockDnsProvider := &MockProvider{}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	controller := WithCustomKubernetesClient(mockProvider, client)
+	controller := WithCustomKubernetesClient(mockHostingProvider, mockDnsProvider, client)
 
 	go func() {
 		controller.StartController()
@@ -69,18 +77,31 @@ func TestControllerIntegration(t *testing.T) {
 
 	waitForController()
 
-	// Validate
-	if !mockProvider.Called {
+	// Validate Hosting Provider
+	if !mockHostingProvider.Called {
 		t.Fatal("expected UpdatePTR to be called, but it wasn't")
 	}
-	if mockProvider.CalledIP != "1.2.3.4" {
-		t.Fatalf("expected IP 1.2.3.4 but got %s", mockProvider.CalledIP)
+	if mockHostingProvider.CalledIP != "1.2.3.4" {
+		t.Fatalf("expected IP 1.2.3.4 but got %s", mockHostingProvider.CalledIP)
 	}
-	if mockProvider.CalledNode != "node-1" {
-		t.Fatalf("expected node name 'node-1' but got %s", mockProvider.CalledNode)
+	if mockHostingProvider.CalledNode != "node-1" {
+		t.Fatalf("expected node name 'node-1' but got %s", mockHostingProvider.CalledNode)
 	}
 
-	t.Logf("✅ Integration test passed: PTR updated for %s -> %s", mockProvider.CalledIP, mockProvider.CalledNode)
+	t.Logf("✅ Integration test passed: PTR updated for %s -> %s", mockHostingProvider.CalledIP, mockHostingProvider.CalledNode)
+
+	// Validate DNS Provider
+	if !mockDnsProvider.Called {
+		t.Fatal("expected UpdatePTR to be called, but it wasn't")
+	}
+	if mockDnsProvider.CalledIP != "1.2.3.4" {
+		t.Fatalf("expected IP 1.2.3.4 but got %s", mockHostingProvider.CalledIP)
+	}
+	if mockDnsProvider.CalledNode != "node-1" {
+		t.Fatalf("expected node name 'node-1' but got %s", mockHostingProvider.CalledNode)
+	}
+
+	t.Logf("✅ Integration test passed: A updated for %s -> %s", mockDnsProvider.CalledIP, mockDnsProvider.CalledNode)
 }
 
 func waitForController() {

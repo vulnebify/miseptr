@@ -10,25 +10,37 @@ import (
 )
 
 var (
-	providerName string
-	ptrSuffix    string
+	provider string
+	dns      string
+	suffix   string
 )
 
 var watchCmd = &cobra.Command{
 	Use:   "watch",
 	Short: "Monitor new Kubernetes nodes and update their PTR records",
 	Run: func(cmd *cobra.Command, args []string) {
-		var provider providers.Provider
+		var hostingProvider providers.HostingProvider
+		var dnsProvider providers.DnsProvider
 
-		switch providerName {
+		switch provider {
 		case "vultr":
-			provider = providers.NewVultrProvider(ptrSuffix)
+			hostingProvider = providers.NewVultrProvider(suffix)
 		default:
-			fmt.Printf("Unsupported provider: %s\n", providerName)
+			fmt.Printf("Unsupported hosting provider: %s\n", provider)
 			os.Exit(1)
 		}
 
-		controller, err := controller.NewController(provider)
+		switch dns {
+		case "cloudflare":
+			dnsProvider = providers.NewCloudflareDnsProvider(suffix)
+		case "":
+			dnsProvider = nil
+		default:
+			fmt.Printf("Unsupported DNS provider: %s\n", dns)
+			os.Exit(1)
+		}
+
+		controller, err := controller.NewController(hostingProvider, dnsProvider)
 		if err != nil {
 			panic(fmt.Sprintf("Failed to create controller: %v", err))
 		}
@@ -38,8 +50,9 @@ var watchCmd = &cobra.Command{
 }
 
 func init() {
-	watchCmd.Flags().StringVar(&providerName, "provider", "vultr", "Provider for PTR updates (vultr)")
-	watchCmd.Flags().StringVar(&ptrSuffix, "suffix", "", "Domain suffix for generated PTR records")
+	watchCmd.Flags().StringVar(&provider, "provider", "vultr", "Provider for PTR updates (vultr)")
+	watchCmd.Flags().StringVar(&dns, "dns", "", "Provider for A updates (optional, options: cloudfalre)")
+	watchCmd.Flags().StringVar(&suffix, "suffix", "", "Domain suffix for generated records")
 
 	cobra.CheckErr(watchCmd.MarkFlagRequired("suffix"))
 }
