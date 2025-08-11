@@ -1,18 +1,8 @@
 # misePTR
 
-**misePTR** (PTR-updater) is a lightweight Kubernetes controller that watches new nodes and automatically updates their **PTR records** (reverse DNS) through provider APIs like Vultr.
+**misePTR** is a lightweight Kubernetes controller that watches new nodes and automatically updates their **DNS records**.
 
 [![Test miseptr](https://github.com/vulnebify/miseptr/actions/workflows/test.yaml/badge.svg)](https://github.com/vulnebify/miseptr/actions/workflows/test.yaml)
-
----
-
-## Features
-
-- Watch Kubernetes Node events in real-time 👀
-- Update PTR (reverse DNS) records automatically 🌍 
-- Pluggable provider system (default: Vultr) 🔌
-- Full integration testing with envtest 🧪
-- Built with Go, no CRDs required ⚡ 
 
 ---
 
@@ -45,10 +35,11 @@ make build
 
 ### Flags
 
-| Flag         | Description                            | Default         |
-|--------------|----------------------------------------|-----------------|
-| `--provider` | Provider backend (e.g., `vultr`)        | `vultr`         |
-| `--suffix`   | Suffix for PTR template (`%s.suffix`)   | *required*      |
+| Flag         | Description                           | Default    |
+|--------------|---------------------------------------|------------|
+| `--provider` | Hosting provider (e.g. `vultr`)       | `vultr`    |
+| `--dns`      | DNS provider (e.g. `cloudflare`)      | *optional* |
+| `--suffix`   | Suffix for PTR template (`%s.suffix`) | *required* |
 
 ---
 
