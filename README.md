@@ -48,8 +48,6 @@ make build
 Install setup-envtest and run tests:
 
 ```bash
-make setup-envtest
-sudo make fetch-envtest-binaries
 make test
 ```
 
