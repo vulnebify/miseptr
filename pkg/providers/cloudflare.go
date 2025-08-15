@@ -73,6 +73,9 @@ func (cdp *CloudflareDnsProvider) UpdateA(ip, nodeName string) error {
 
 	_, err = cdp.client.DNS.Records.New(ctx, newRecordParams, options)
 	if err != nil {
+		if strings.Contains(err.Error(), "An identical record already exists.") {
+			fmt.Printf("✅ A already exists: %s -> %s\n", aRecord, ip)
+		}
 		fmt.Printf("Failed to create A record: %v\n", err)
 		return err
 	}
