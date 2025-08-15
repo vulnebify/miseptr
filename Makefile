@@ -5,7 +5,14 @@ VERSION ?= $(shell git describe --tags --always --dirty)
 
 KUBERNETES_VERSION = 1.27
 ENVTEST_BIN_ROOT = /tmp/testbin
-KUBEBUILDER_ASSETS_PATH = $(shell setup-envtest use $(KUBERNETES_VERSION) --bin-dir=$(ENVTEST_BIN_ROOT) | grep 'Path:' | awk '{print $$2}')
+
+GOBIN ?= $(shell go env GOBIN)
+ifeq ($(GOBIN),)
+  GOBIN := $(shell go env GOPATH)/bin
+endif
+SETUP_ENVTEST := $(GOBIN)/setup-envtest
+
+KUBEBUILDER_ASSETS_PATH = $(shell $(SETUP_ENVTEST) use $(KUBERNETES_VERSION) --bin-dir=$(ENVTEST_BIN_ROOT) | grep 'Path:' | awk '{print $$2}')
 
 .PHONY: all build clean test setup-envtest fetch-envtest-binaries
 
@@ -27,7 +34,7 @@ setup-envtest:
 fetch-envtest-binaries:
 	@echo "🌐 Downloading Kubernetes binaries for envtest..."
 	mkdir -p $(ENVTEST_BIN_ROOT)
-	@setup-envtest use $(KUBERNETES_VERSION) --bin-dir=$(ENVTEST_BIN_ROOT)
+	@$(SETUP_ENVTEST) use $(KUBERNETES_VERSION) --bin-dir=$(ENVTEST_BIN_ROOT)
 	@echo "✅ Binaries fetched into $(KUBEBUILDER_ASSETS_PATH)"
 
 test: fetch-envtest-binaries
