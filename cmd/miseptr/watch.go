@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/spf13/cobra"
 	"github.com/vulnebify/miseptr/internal/controller"
@@ -19,6 +22,9 @@ var watchCmd = &cobra.Command{
 	Use:   "watch",
 	Short: "Monitor new Kubernetes nodes and update their PTR records",
 	Run: func(cmd *cobra.Command, args []string) {
+		ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+		defer cancel()
+
 		var hostingProvider providers.HostingProvider
 		var dnsProvider providers.DnsProvider
 
@@ -46,6 +52,8 @@ var watchCmd = &cobra.Command{
 		}
 
 		controller.StartController()
+
+		<-ctx.Done() // Keep the tool running until a host sends SIGTERM/SIGINT
 	},
 }
 
