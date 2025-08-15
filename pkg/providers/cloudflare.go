@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/cloudflare/cloudflare-go/v5"
@@ -49,8 +50,14 @@ func (cdp *CloudflareDnsProvider) UpdateA(ip, nodeName string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
+	aRecord, err := cdp.formatARecord(cdp.suffix, nodeName)
+	if err != nil {
+		fmt.Printf("Failed to format A record: %v\n", err)
+		return err
+	}
+
 	aRecordParams := dns.ARecordParam{
-		Name:    cloudflare.F(nodeName),
+		Name:    cloudflare.F(aRecord),
 		TTL:     cloudflare.F(dns.TTL(60)),
 		Type:    cloudflare.F(dns.ARecordTypeA),
 		Content: cloudflare.F(ip),
@@ -64,13 +71,28 @@ func (cdp *CloudflareDnsProvider) UpdateA(ip, nodeName string) error {
 
 	options := option.WithMaxRetries(3)
 
-	_, err := cdp.client.DNS.Records.New(ctx, newRecordParams, options)
+	_, err = cdp.client.DNS.Records.New(ctx, newRecordParams, options)
 	if err != nil {
 		fmt.Printf("Failed to create A record: %v\n", err)
 		return err
 	}
 	fmt.Printf("✅ A updated: %s -> %s\n", nodeName, ip)
 	return nil
+}
+
+func (cdp *CloudflareDnsProvider) formatARecord(suffix, nodeName string) (string, error) {
+	suffix = strings.TrimSuffix(strings.ToLower(suffix), ".") // normalize
+	base, err := publicsuffix.EffectiveTLDPlusOne(suffix)
+	if err != nil {
+		return "", err
+	}
+
+	if suffix == base {
+		return nodeName, nil // no subdomain
+	}
+
+	subdomain := strings.TrimSuffix(suffix, "."+base)
+	return nodeName + "." + subdomain, nil
 }
 
 func (cdp *CloudflareDnsProvider) getZone() error {

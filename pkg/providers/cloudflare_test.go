@@ -21,7 +21,7 @@ func TestCloudflareIntegration(t *testing.T) {
 	recordType := dns.RecordListParamsTypeA
 	recordListParamsMatch := dns.RecordListParamsMatchAny
 	recordListParamsName := dns.RecordListParamsName{
-		Exact: cloudflare.F("vulnefy-node123.vulnefy.com"),
+		Exact: cloudflare.F("vulnefy-node123.scanning.vulnefy.com"),
 	}
 
 	dnsRecordListParams := dns.RecordListParams{
@@ -46,8 +46,8 @@ func TestCloudflareIntegration(t *testing.T) {
 	if len(createdRecord.Result) != 1 {
 		t.Fatalf("expected 1 DNS record, got %d", len(createdRecord.Result))
 	}
-	if createdRecord.Result[0].Name != "vulnefy-node123.vulnefy.com" {
-		t.Fatalf("expected DNS 'vulnefy-node123.vulnefy.com', got '%s'", createdRecord.Result[0].Name)
+	if createdRecord.Result[0].Name != "vulnefy-node123.scanning.vulnefy.com" {
+		t.Fatalf("expected DNS 'vulnefy-node123.scanning.vulnefy.com', got '%s'", createdRecord.Result[0].Name)
 	}
 
 	t.Cleanup(func() {
