@@ -76,7 +76,7 @@ func (cdp *CloudflareDnsProvider) UpdateA(ip, nodeName string) error {
 		fmt.Printf("Failed to create A record: %v\n", err)
 		return err
 	}
-	fmt.Printf("✅ A updated: %s -> %s\n", nodeName, ip)
+	fmt.Printf("✅ A updated: %s -> %s\n", aRecord, ip)
 	return nil
 }
 
